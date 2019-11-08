@@ -1,0 +1,57 @@
+{
+  "name": "js-native",
+  "version": "0.0.1",
+  "description": "Simple javascript object based components",
+  "main": "index.js",
+  "scripts": {
+    "start": "NODE_ENV=development node build/build.js",
+    "lint": "eslint --fix --ext .js lib/**",
+    "clean": "rm -rf dist/* && cp src/index.html dist/index.html",
+    "build": "webpack --config build/build.prod.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com"
+  },
+  "keywords": [
+    "js-native",
+    "javascript object components",
+    "native components"
+  ],
+  "author": "Webpack",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jsnative/webpack/issues"
+  },
+  "homepage": "https://github.com/jsnative/webpack",
+  "dependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/node": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.7.0",
+    "@babel/preset-env": "^7.4.5",
+    "@js-native/lib": "^1.0.0",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.6",
+    "clean-webpack-plugin": "^3.0.0",
+    "css-loader": "^3.0.0",
+    "eslint": "^6.2.2",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-babel": "^5.3.0",
+    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-promise": "^4.1.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "express": "^4.17.0",
+    "file-loader": "^4.0.0",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "standard": "*",
+    "style-loader": "^0.23.1",
+    "url-loader": "^2.0.0",
+    "webpack": "^4.34.0",
+    "webpack-cli": "^3.3.4",
+    "webpack-dev-server": "^3.7.1",
+    "webpack-hot-middleware": "^2.25.0",
+    "webpack-merge": "^4.2.1"
+  }
+}
