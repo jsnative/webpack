@@ -57,7 +57,19 @@ module.exports = {
   ],
   module: {
     rules: [
-      { test: /\.js$/, loader: 'babel-loader' },
+      {
+        test: /\.js$/, loader: 'babel-loader',
+        options: {
+          presets: [
+            "@babel/preset-env"
+          ],
+          plugins: [
+            [
+              "@babel/plugin-proposal-class-properties"
+            ]
+          ]
+        }
+      },
       { test: /\.html$/, loader: 'html-loader' },
       { test: /\.(png|svg|jpg|gif)$/, loader: 'file-loader' },
       { test: /\.(woff(2)?|ttf|eot|svg)?$/, loader: 'file-loader' },
