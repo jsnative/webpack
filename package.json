@@ -29,7 +29,7 @@
     "@babel/node": "^7.4.5",
     "@babel/plugin-proposal-class-properties": "^7.7.0",
     "@babel/preset-env": "^7.4.5",
-    "@js-native/lib": "^1.0.3",
+    "@js-native/lib": "^1.0.4",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.6",
     "clean-webpack-plugin": "^3.0.0",
