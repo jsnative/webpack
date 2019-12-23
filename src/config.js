@@ -1,10 +1,28 @@
-import Home from "@src/home";
-import Theme from "@js-native/lib/includes/theme";
+// theme imports
+import { AppTheme } from "@src/themes";
+// source imports
+import App from "@src/app";
 
 export default {
-  theme: Theme,
+  // default theme
+  theme: AppTheme,
+  // define app routes
   routes: [
-    { path: '/', component: Home, name: "Home" }
-  ]
+    { path: '/', component: App, name: "App" }
+  ],
+  // Custom definitions
+  contextMenus: [],
+  // User preferences
+  UserPreferences: {},
+  // Custom methods
+  registerContextMenu: (container, menu) => {
+    Config.contextMenus.push({ sender: container, menu: menu });
+  },
+
+  events: {
+    Sidebar: {
+      fileSelected: 'sidebar.file-selected'
+    }
+  }
 }
 
