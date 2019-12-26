@@ -23,6 +23,10 @@ export default {
     Sidebar: {
       fileSelected: 'sidebar.file-selected'
     }
-  }
+  },
+
+  caretDirection: { left: 1, right: 2, top: 3, bottom: 4 },
+  caretSize: { small: 4, medium: 8, large: 12, xlarge: 16 },
+  sidebarDataKind: { folder: 1, file: 2 }
 }
 

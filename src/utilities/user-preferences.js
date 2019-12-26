@@ -21,7 +21,7 @@ export default {
 
       "workspace.editor.background": "#070707",
 
-      "workspace.sidebar.width": 0,
+      "workspace.sidebar.width": 240,
       "workspace.sidebar.background": "#0C0C0C"
     }`);
     let saveTimeout;
