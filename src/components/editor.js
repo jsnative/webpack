@@ -1,5 +1,5 @@
-import { Component, TextArea } from '@core/components';
-import { ContainerResize } from '../themes/app-theme';
+import { Component, TextArea, Container, Label, Span } from '@core/components';
+import { ContainerResize, KeyContainer } from '../themes/app-theme';
 
 import '../assets/fira-code/fira_code.css';
 import CodeMirror from 'codemirror/lib/codemirror.js';
@@ -23,25 +23,42 @@ import 'codemirror/addon/comment/comment.js';
 export default class Editor extends Component {
 
   Pref = undefined;
-  textArea;
+  textArea; editor;
+  filename = "Preferences.js";
 
   constructor() {
     super();
     this.Pref = Config.UserPreferences.workspace.editor;
+    KeyContainer(this, {
+      'ctrl+s': () => this.editor && this.editor.save()
+    })
     const defaultEditorWidth = (window.innerWidth * 0.44);
     this.background(this.Pref.background || Theme.Colors.Editor.background)
       .size('auto',  '100vh')
+      .paddingRight(8)
       .borderLeft('2px solid ' + Theme.Colors.black);
     this.textArea = new TextArea()
       .size('100%', 'calc(100% - 40px)')
       .backgroundColor(this.Pref.background || Theme.Colors.Editor.background)
       .border(0).outline(0).color(Theme.Colors.white)
       .value("Hello world, this tolu speaking")
-      .fontFamily('"Consolas", Courier')
-//       .text(`function major() {
-
-// }
-//       `);
+      .fontFamily('"Consolas", Courier');
+    this.addChild(
+      new Container().size('100%', 34)
+        .display('flex')
+        .alignItems('center')
+        .padding(10)
+        .addChild(
+          new Span()
+            .addClassName('ic-js-small')
+            .color(Theme.Colors.orange)
+            .fontSize(20)
+            .marginRight(6),
+          new Label().text(this.filename)
+            .color(Theme.Colors.Panel.darkText2)
+            .fontSize(Theme.Fonts.normal)
+        )
+    )
     this.addChild(this.textArea);
     // this.addChild(new ContainerResize({ min: 240, max: 450 }));
   }
@@ -52,11 +69,12 @@ export default class Editor extends Component {
     const wait = setInterval(() => {
       if(this.textArea.node()) {
         clearInterval(wait);
-        const editor = CodeMirror.fromTextArea(this.textArea.node(), {
+        this.editor = CodeMirror.fromTextArea(this.textArea.node(), {
           mode: { name: 'javascript', globalVars: true },
           extraKeys: {
             'Ctrl-Space': 'autocomplete',
-            'Ctrl-/': (cm) => { cm.toggleComment({ indent: true }) }
+            'Ctrl-/': (cm) => { cm.toggleComment({ indent: true }) },
+            'Ctrl-S': (cm) => { cm.save() }
           },
           lineNumbers: true,
           lineWrapping: true,
@@ -74,14 +92,14 @@ export default class Editor extends Component {
           indentWithTabs: true,
           tabSize: 2
         });
-        editor.on("keyup", function(editor, event) {
-          const cursor = editor.getDoc().getCursor();
-          const token = editor.getTokenAt(cursor);
-          if (!editor.state.completionActive
+        this.editor.on("keyup", (editor, event) => {
+          const cursor = this.editor.getDoc().getCursor();
+          const token = this.editor.getTokenAt(cursor);
+          if (!this.editor.state.completionActive
             && !ExcludedIntelliSenseTriggerKeys[(event.keyCode || event.which).toString()]
             && (token.type == "tag" || token.type == "variable" || token.string == " " || token.string == "<" || token.string == "/" || token.string == ".")
           ) {
-            CodeMirror.commands.autocomplete(editor, null, { completeSingle: false });
+            CodeMirror.commands.autocomplete(this.editor, null, { completeSingle: false });
           }
         });
         const indentGuidesOverlay = {
@@ -99,27 +117,61 @@ export default class Editor extends Component {
               stream.skipToEnd();
               return null;
             }
-            // editor.getSpaceUnits();
             return "left-guide";
           },
           flattenSpans: false
         }
-        function updateUI() {
-          if (editor) {
-            editor.removeOverlay(indentGuidesOverlay);
-            editor.addOverlay(indentGuidesOverlay);
-            editor.refresh();
+        const updateUI = () => {
+          if (this.editor) {
+            this.editor.removeOverlay(indentGuidesOverlay);
+            this.editor.addOverlay(indentGuidesOverlay);
+            this.editor.refresh();
           }
         }
-        editor.on('change', updateUI);
-        editor.on('change', function(cm, change) {
-          if (change.origin != "paste" || change.text.length < 2) return;
+        this.editor.on('change', updateUI);
+        this.editor.on('change', function(cm, change) {
+          if(change.text.length < 2) return;
+          if(change.origin != "paste" && change.origin != "setValue") return;
           cm.operation(function() {
             for (var line = change.from.line, end = CodeMirror.changeEnd(change).line; line < end; ++line)
               cm.indentLine(line, "smart");
           });
+        });
+        this.editor.setValue(`function major() {
+  const major = "Let it rip";
+  if(major.split().length > 0) {
+    major.split().forEach(i => {
+      console.log(i);
+    })
+  }
+}
+
+function checkingIn() {
+  // an attempt to check-in
+  Main.getDoc().onLoad((major) => {
+    // starting the process
+    if(major === "something special") {
+      // then make the process workd
+      this.spawn("new process", major.init()).then(res => {
+        console.log("Starting new process");
+        res.makeReason("We are getting ready!").then(res => {
+          res.makeMajor("We are coming for you now");
+          // load the process into the queue
+          major.queue.addProcess(res.newProcess());
+          if(major.queue.getNewProcess()) {
+            major.sprintForward();
+            major.makeNewRequest().then(res => {
+              console.log(res);
+              major.clean();
+              major.quit();
+            })
+          }
         })
-      }
+      })
+    }
+  })
+}`)
+      };
     }, 100);
   }
 }

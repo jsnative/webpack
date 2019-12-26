@@ -5,7 +5,6 @@ import Editor from '../editor';
 import Designer from '../designer';
 import Sidebar from '../sidebar';
 import { Draggable } from '../../utilities';
-import { KeyContainer } from '@src/themes/app-theme';
 
 export default class MainContainer extends Container {
 
@@ -16,7 +15,6 @@ export default class MainContainer extends Container {
   constructor() {
     super();
     // initialize
-    KeyContainer(this, this.keyEvents);
     Config.registerContextMenu(this, this.contextMenu);
     // design
     this.background(Theme.Colors.white)
