@@ -1,27 +1,74 @@
-import { Component, Container, H1, Canvas, Span } from '@core/components';
+import {Container, Component, H1, Canvas, Span } from '@core/components';
+import Draw from './draw';
+import { Draggable, Scrollable } from '../utilities';
+import SimpleBar from 'simplebar';
 
 export default class Designer extends Component {
 
   canvas; toolbox;
+  draw; cursor;
   constructor() {
     super();
+    Config.designer = this;
 
-    this.canvas = new Canvas()
-      .size(5000, 5000)
-      .backgroundColor(Theme.Colors.Panel.background);
     this.toolbox = new Toolbox();
+    this.canvas = new Container()
+      .backgroundColor(Theme.Colors.white)
+      .size(1400, 1600)
+      .margin(200);
 
-    this.background(Theme.Colors.Panel.background)
+    this.backgroundPosition('0px 0px, 48px 48px, 0px 1px, 16px 16px')
+      .backgroundRepeat('repeat, repeat, repeat, repeat')
+      .backgroundAttachment('scroll, scroll, scroll, scroll')
+      .backgroundImage('radial-gradient(at center center, black 1%, transparent 6%), radial-gradient(at center center, black 1%, transparent 6%), radial-gradient(at center center, rgba(255, 255, 255, 0.1) 0%, transparent 10%), radial-gradient(at center center, rgba(255, 255, 255, 0.1) 0%, transparent -1%)')
+      .backgroundOrigin('padding-box, padding-box, padding-box, padding-box')
+      .backgroundClip('border-box, border-box, border-box, border-box')
+      .backgroundColor(Theme.Colors.Panel.background)
+      .backgroundSize('24px 24px')
       .size('auto', '100vh')
-      .overflow('auto')
-      .position('relative');
-    this.addChild(this.canvas, this.toolbox);
+      .position('relative')
+      .boxSizing('border-box');
+    this.addChild(this.toolbox, this.canvas);
 
-    this.canvas.absCenter(true);
+    Bus.on(Config.events.Designer.cursorV, () => { cursor = 'v'; });
+
+    let sx, sy, started = false, last;
+    Draggable(this, (x, y, event) => {
+      if(this.draw && event.target.tagName.toLowerCase() === 'canvas') {
+        const lx = event.layerX, ly = event.layerY;
+        if(!started) {
+          sx = lx; sy = ly;
+          started = true;
+        }else {
+          if(last) {
+            if(last.x === sx && last.y === sy) {
+              if(sx > lx || sy > ly) {
+                this.draw.ctx.clearRect(last.x + 1, last.y + 1, last.w - 2, last.h - 2);
+              }else {
+                this.draw.ctx.clearRect(last.x - 1, last.y - 1, last.w + 2, last.h + 2);
+              }
+            }
+          }
+        }
+        this.draw.ctx.globalCompositeOperation = 'source-over';
+        this.draw.ctx.beginPath();
+        this.draw.ctx.strokeStyle = Theme.Colors.appBlue01;
+        this.draw.ctx.fillStyle = Theme.Colors.$.lighten(Theme.Colors.appBlue01, 50) + '40'
+        this.draw.ctx.rect(sx, sy, lx - sx, ly - sy);
+        last = { x: sx, y: sy, w: lx - sx, h: ly - sy };
+        this.draw.ctx.stroke();
+        this.draw.ctx.fill();
+      }
+    }, {
+      mouseup: () => {
+        started = false;
+      }
+    });
+
   }
 
   onCreate() {
-    // setTimeout(() => this.absCenterLeft(true));
+    new SimpleBar(this.node());
   }
 }
 
@@ -32,16 +79,35 @@ export class Toolbox extends Container {
     this.backgroundColor(Theme.Colors.Designer.toolboxBackground)
       .borderRadius(24)
       .display('flex')
-      .position('absolute')
-      .left('50%')
+      .position('fixed')
+      .right(0)
       .padding([4, 0, 4, 4])
       .transform('translateX(-50%)')
       .marginTop(12)
       .boxShadow('0px 4px 6px rgba(0,0,0,0.25)')
       .addChild(
-        new Tool('ic-pointer'),
-        new Tool('ic-grab'),
-        new Tool('ic-text-cursor'),
+        new Tool('ic-pointer-filled')
+          .on({ click: function() {
+            Bus.emit(Config.events.Designer.clearCursor, true);
+            Bus.emit(Config.events.Designer.cursorV, true);
+            this.enable();
+            Config.designer.cursor('default');
+          } })
+          .paddingLeft(3),
+        new Tool('ic-grab')
+          .on({ click: function() {
+            Bus.emit(Config.events.Designer.clearCursor, true);
+            Bus.emit(Config.events.Designer.cursorGrab, true);
+            this.enable();
+            Config.designer.cursor('grab');
+          } }),
+        new Tool('ic-text-cursor')
+          .on({ click: function() {
+            Bus.emit(Config.events.Designer.clearCursor, true);
+            Bus.emit(Config.events.Designer.cursorText, true);
+            this.enable();
+            Config.designer.cursor('text');
+          } }),
         // new Tool('ic-')
       )
 
@@ -60,5 +126,13 @@ export class Tool extends Span {
       .hover({ backgroundColor: '#4C4C4C' })
       .cursor('pointer')
       .flexCenter(true);
+
+    Bus.on(Config.events.Designer.clearCursor, () => {
+      this.backgroundColor('transparent');
+    })
+  }
+
+  enable() {
+    this.backgroundColor('#4C4C4C');
   }
 }

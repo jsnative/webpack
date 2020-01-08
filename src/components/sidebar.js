@@ -1,5 +1,7 @@
 import { Component, Container, Input, Button, Span, Label } from '@core/components';
 import { KeyContainer, Caret } from '@src/themes/app-theme';
+import SimpleBar from 'simplebar';
+import 'simplebar/dist/simplebar.css';
 
 export default class Sidebar extends Component {
 
@@ -7,6 +9,7 @@ export default class Sidebar extends Component {
   fileExplorer;
   componentExplorer;
   sidebarFileMenu;
+  explorerContainer;
 
   constructor() {
     super();
@@ -17,8 +20,21 @@ export default class Sidebar extends Component {
 
     this.fileExplorer = new Container()
       .flexGrow('1')
-      .padding(24, 0)
+      .padding(24, 0);
     this.sidebarFileMenu = new SidebarFileMenu();
+    this.explorerContainer = new Container()
+      .overflowX('auto')
+      .display('flex')
+      .height('calc(100% - 111px)')
+      .addChild(
+        new Container()
+          .backgroundColor(this.Pref.background)
+          .position('absolute')
+          .height('calc(100% - 130px)')
+          .width(30).top(111).right(0)
+          .zIndex(0),
+        this.fileExplorer
+      );
 
     const defaultWidth = 240;
     this.size(defaultWidth, '100vh')
@@ -28,24 +44,14 @@ export default class Sidebar extends Component {
         new SidebarSearch()
       ),
       this.sidebarFileMenu,
-      new Container()
-        .overflowX('auto')
-        .display('flex')
-        .height('calc(100% - 111px)')
-        .addChild(new Container()
-          .backgroundColor(this.Pref.background)
-          .position('absolute')
-          .height('calc(100% - 130px)')
-          .width(30).top(111).right(0)
-          .zIndex(0)
-        )
-        .addChild(this.fileExplorer)
+      this.explorerContainer
     );
 
     this.loadFileDirectory();
   }
 
   onCreate() {
+    new SimpleBar(this.explorerContainer.node());
     setTimeout(() => this.sidebarFileMenu.enableFileExplorer(), 250);
   }
 
@@ -227,7 +233,7 @@ export class Folder extends Container {
     this.container = new Container()
       .size('100%', 'auto')
       .transition('.3s all cubic-bezier(0.19, 1, 0.22, 1)')
-      .overflow('hidden');
+      // .overflow('hidden');
 
     this.addChild(
       new Container()

@@ -1,5 +1,6 @@
 import UserPreferences from './user-preferences';
 import Preferences from './preferences';
+import {Container} from '@core/components';
 
 export { UserPreferences, Preferences };
 
@@ -52,17 +53,23 @@ export const Settings = {
   }
 }
 
-export const Draggable = function(element, draw) {
+export const Draggable = function(element, draw, callers) {
   let moveReady = false;
   const mousedown = function(e) {
     moveReady = true;
     window.addEventListener('mouseup', mouseup);
     window.addEventListener('mousemove', mousemove);
+    if(callers && callers.hasOwnProperty('mousedown')) {
+      Function.prototype.call.apply(callers['mousedown'], [moveReady]);
+    }
   };
 
   const mousemove = function(e) {
     if(moveReady) {
       draw(e.clientX, e.clientY, e);
+    }
+    if(callers && callers.hasOwnProperty('mousemove')) {
+      Function.prototype.call.apply(callers['mousemove'], [moveReady]);
     }
   }
 
@@ -70,6 +77,9 @@ export const Draggable = function(element, draw) {
     moveReady = false;
     window.removeEventListener('mouseup', mouseup);
     window.removeEventListener('mousemove', mousemove);
+    if(callers && callers.hasOwnProperty('mouseup')) {
+      Function.prototype.call.apply(callers['mouseup'], [moveReady]);
+    }
   };
 
   element.on({
@@ -78,3 +88,4 @@ export const Draggable = function(element, draw) {
     'mousemove': mousemove
   });
 }
+

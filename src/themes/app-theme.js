@@ -1,5 +1,5 @@
 import {
-  Span, Container
+  Span, Container, Component
 } from "@core/components";
 
 const Theme = {
@@ -46,7 +46,27 @@ const Theme = {
     grey3: '#828282',
     orange: '#FFAA20',
     white: '#FFFFFF',
-    black: '#000000'
+    black: '#000000',
+    $: {
+      darken: (color, percent) => {
+        return Color.$.lighten(color, -percent);
+      },
+      lighten: (color, percent) => {
+        percent = percent / 100;
+        /* Credit: https://github.com/PimpTrizkit/PJs/wiki
+          12.-Shade,-Blend-and-Convert-a-Web-Color-(pSBC.js)
+         */
+        const f = parseInt(color.slice(1), 16);
+        const t = percent < 0 ? 0 : 255;
+        const p = percent < 0 ? percent * -1 : percent;
+        const R = f >> 16;
+        const G = f >> 8 & 0x00FF;
+        const B = f & 0x0000FF;
+        return '#' + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000
+          + (Math.round((t - G) * p) + G) * 0x100
+          + (Math.round((t - B) * p) + B)).toString(16).slice(1);
+      }
+    }
   },
 
   Specs: {
@@ -83,11 +103,11 @@ export const KeyContainer = function(container, events) {
       if(shift) key += 'shift+';
 
       if(alt || ctrl || shift) {
-        e.preventDefault();
-        e.stopPropagation();
         key += e.key.toLowerCase();
-        console.warn("keylistener >>> "+key);
         if(events.hasOwnProperty(key)) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.warn("keylistener >>> "+key);
           Function.prototype.call.apply(events[key]);
         }
       }
@@ -103,7 +123,6 @@ export const KeyContainer = function(container, events) {
     'keydown': (e) => register(e),
     'keyup': (e) => register(e)
   });
-
 
 }
 
@@ -125,6 +144,87 @@ export class Caret extends Span {
     if(direction === dir.left) this.borderRightWidth(thickness).borderBottomWidth(thickness);
     if(direction === dir.bottom) this.borderTopWidth(thickness).borderRightWidth(thickness);
     if(direction === dir.top) this.borderBottomWidth(thickness).borderLeftWidth(thickness);
+  }
+}
+
+export class ScrollComponent extends Component {
+
+  _bar; _content;
+
+  constructor(...args) {
+    super(...args);
+    this._bar = new Container()
+      .position('absolute')
+      .backgroundColor('rgba(0, 0, 0, 1)')
+      .width(9).borderRadius(4).top(0).zIndex('2').cursor('pointer')
+      .transition('opacity 0.25s linear')
+      .minHeight('40px');
+    this._content = new Container()
+      .size('calc(100% + 18px)', '100%')
+      .padding('0 0 0 0')
+      .overflowX('auto')
+      .overflowY('scroll')
+      .boxSizing('border-box');
+    this.height('1500px');
+    let lastPageY,
+      raf = window.requestAnimationFrame || w.setImmediate || function(c) { return setTimeout(c, 0); };
+    this._bar.on({
+      mousedown: function(e) {
+        lastPageY = e.pageY;
+        // set mousedown css
+        window.addEventListener('mousemove', drag);
+        window.addEventListener('mouseup', stop);
+        return false;
+      }
+    });
+    this.position('relative')
+      .overflow('hidden')
+      .zIndex('1');
+
+    const drag = (e) => {
+      let delta = e.pageY - lastPageY;
+      lastPageY = e.pageY;
+      raf(() => {
+        this._content.node().scrollTop += delta / this.scrollRatio;
+      });
+    }
+
+    const stop = function() {
+      // remove mousedown css
+      window.removeEventListener('mousemove', drag);
+      window.removeEventListener('mouseup', stop);
+    }
+
+    const moveBar = (e) => {
+      let totalHeight = this.node().scrollHeight,
+          ownHeight = this.node().clientHeight;
+
+      this.scrollRatio = ownHeight / totalHeight;
+
+      var isRtl = this.direction() === 'rtl';
+      var right = isRtl ?
+        (this._content.node().clientWidth - this._bar.node().clientWidth + 18) :
+        (this._content.node().clientWidth - this._bar.node().clientWidth) * -1;
+
+      raf(() => {
+        // Hide scrollbar if no scrolling is possible
+        if(this.scrollRatio >= 1) {
+          // this._bar.classList.add('ss-hidden')
+        } else {
+          // _this.bar.classList.remove('ss-hidden')
+          this._bar.height(Math.max(this.scrollRatio * 100, 10) + '%')
+            .top((this._content.node().scrollTop / totalHeight ) * 100 + '%')
+            .right(right);
+        }
+      });
+    }
+
+    super.addChild(this._content, this._bar);
+  }
+
+  addChild(...children) {
+    this._content.addChild(...children);
+    return this;
   }
 
 }

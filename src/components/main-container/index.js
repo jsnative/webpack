@@ -34,7 +34,9 @@ export default class MainContainer extends Container {
       this.addChild(this.editor);
       this.editor.absTopLeft(0, 240)
         .right(window.innerWidth - (240 + 600));
-      this.editor.addChild(new ContainerResize(this.editorResize))
+      this.editor.addChild(new ContainerResize(this.editorResize)
+        .backgroundColor('#141414')
+      )
     }
     //
     this.designer = new Designer();

@@ -19,9 +19,19 @@ export default {
     Config.contextMenus.push({ sender: container, menu: menu });
   },
 
+  editor: undefined,
+  sidebar: undefined,
+  designer: undefined,
+
   events: {
     Sidebar: {
       fileSelected: 'sidebar.file-selected'
+    },
+    Designer: {
+      cursorV: 'designer.cursor-v',
+      cursorGrab: 'designer.cursor-grab',
+      cursorText: 'designer.cursor-text',
+      clearCursor: 'designer.clear-cursor'
     }
   },
 

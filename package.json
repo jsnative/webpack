@@ -55,6 +55,9 @@
     "webpack-merge": "^4.2.1"
   },
   "dependencies": {
-    "codemirror": "^5.50.0"
+    "@js-native/lib": "^1.0.4",
+    "codemirror": "^5.50.0",
+    "save": "^2.4.0",
+    "simplebar": "^5.1.0"
   }
 }
