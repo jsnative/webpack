@@ -2,6 +2,7 @@ import {Container, Component, H1, Canvas, Span } from '@core/components';
 import Draw from './draw';
 import { Draggable, Scrollable } from '../utilities';
 import SimpleBar from 'simplebar';
+import { Menu } from '@src/themes/app-theme';
 
 export default class Designer extends Component {
 
@@ -12,10 +13,17 @@ export default class Designer extends Component {
     Config.designer = this;
 
     this.toolbox = new Toolbox();
-    this.canvas = new Container()
+    const cont = new Container()
       .backgroundColor(Theme.Colors.white)
       .size(1400, 1600)
-      .margin(200);
+      .position('relative');
+    Config.registerContextMenu(cont);
+    this.canvas = new Container()
+      .padding(800)
+      .size('auto', 'auto')
+      .display('inline-block')
+      .addChild(cont);
+    Config.registerContextMenu(this.canvas, 'canvas');
 
     this.backgroundPosition('0px 0px, 48px 48px, 0px 1px, 16px 16px')
       .backgroundRepeat('repeat, repeat, repeat, repeat')

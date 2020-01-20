@@ -69,7 +69,7 @@ export default class Editor extends Component {
       .fontFamily('"Consolas", Courier');
 
     this.container.addChild(this.textArea);
-    this.addChild(this.topBar,this.container);
+    this.addChild(this.topBar, this.container);
     // this.addChild(new ContainerResize({ min: 240, max: 450 }));
   }
 
@@ -147,40 +147,36 @@ export default class Editor extends Component {
     this.editor.on('save', function() {
       console.log("savinhg....");
     })
-    this.editor.setValue(`function major() {
-      const major = "Let it rip";
-      if(major.split().length > 0) {
-        major.split().forEach(i => {
-          console.log(i);
-        })
-      }
-    }
-
-    function checkingIn() {
-      // an attempt to check-in
-      Main.getDoc().onLoad((major) => {
-        // starting the process
-        if(major === "something special") {
-          // then make the process workd
-          this.spawn("new process", major.init()).then(res => {
-            console.log("Starting new process");
-            res.makeReason("We are getting ready!").then(res => {
-              res.makeMajor("We are coming for you now");
-              // load the process into the queue
-              major.queue.addProcess(res.newProcess());
-              if(major.queue.getNewProcess()) {
-                major.sprintForward();
-                major.makeNewRequest().then(res => {
-                  console.log(res);
-                  major.clean();
-                  major.quit();
-                })
-              }
-            })
-          })
+    this.editor.setValue(`function setProp(name) {
+  let _val;
+  Object.defineProperty(this, name, {
+    get: function() {
+      const list = {
+        'Editor.doc': {
+          clock: 'Special effect',
+          name: 'Cool man'
         }
-      })
-}`)
+      }
+      return list[Native.lock.key];
+    },
+    set: (v) => {
+      _val = v;
+    }
+  })
+}
+// setProp.call(window, '$');
+
+const a = {
+  name: function(v) {
+    console.log(v);
+  }
+}
+
+const Main = function() {
+  a.name($.clock);
+}
+
+`)
   }
 
   save() {

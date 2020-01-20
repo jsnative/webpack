@@ -1,5 +1,5 @@
 import {
-  Span, Container, Component
+  Span, Container, Component, Label, HR
 } from "@core/components";
 
 const Theme = {
@@ -42,6 +42,11 @@ const Theme = {
     Designer: {
       toolboxBackground: '#141414'
     },
+    ContextMenu: {
+      background: '#141414',
+      textColor: '#BDBDBD',
+      borderColor: '#1E2625'
+    },
     appBlue01: '#1F8ECD',
     grey3: '#828282',
     orange: '#FFAA20',
@@ -49,7 +54,7 @@ const Theme = {
     black: '#000000',
     $: {
       darken: (color, percent) => {
-        return Color.$.lighten(color, -percent);
+        return Theme.Colors.$.lighten(color, -percent);
       },
       lighten: (color, percent) => {
         percent = percent / 100;
@@ -147,85 +152,92 @@ export class Caret extends Span {
   }
 }
 
-export class ScrollComponent extends Component {
-
-  _bar; _content;
-
-  constructor(...args) {
-    super(...args);
-    this._bar = new Container()
-      .position('absolute')
-      .backgroundColor('rgba(0, 0, 0, 1)')
-      .width(9).borderRadius(4).top(0).zIndex('2').cursor('pointer')
-      .transition('opacity 0.25s linear')
-      .minHeight('40px');
-    this._content = new Container()
-      .size('calc(100% + 18px)', '100%')
-      .padding('0 0 0 0')
-      .overflowX('auto')
-      .overflowY('scroll')
-      .boxSizing('border-box');
-    this.height('1500px');
-    let lastPageY,
-      raf = window.requestAnimationFrame || w.setImmediate || function(c) { return setTimeout(c, 0); };
-    this._bar.on({
-      mousedown: function(e) {
-        lastPageY = e.pageY;
-        // set mousedown css
-        window.addEventListener('mousemove', drag);
-        window.addEventListener('mouseup', stop);
-        return false;
+export class Menu extends Container {
+  label; caret; shortcut; subs; config;
+  constructor(menu) {
+    super(menu);
+    this.config = menu;
+    if(!this.config.separator) {
+      this.label = new Label().text(this.config.title)
+        .size('100%', 24).display('inline-block')
+        .fontSize(Theme.Fonts.normal)
+        .whiteSpace('nowrap').marginRight(10);
+      this.subs = new Container()
+        .backgroundColor(Theme.Colors.ContextMenu.background)
+        .size(220, 'auto')
+        .minHeight(50)
+        .position('absolute')
+        .left('100%')
+        .top(0)
+        .borderRadius(5)
+        .boxShadow('0px 4px 36px rgba(0,0,0,0.25)')
+        .padding(5);
+      this.lineHeight('1.6')
+        .padding(0, 8)
+        .borderRadius(3)
+        .display('flex')
+        .justifyContent('space-between')
+        .color(Theme.Colors.ContextMenu.textColor)
+        .addChild(this.label)
+        .on({
+          mouseover: () => { this.setHover() },
+          mouseout: () => { this.clearHover() },
+          mouseup: () => { this.clearHover() }
+        })
+      if(this.config.subs) {
+        this.caret = new Caret(8, 2, 2)
+          .alignSelf('center');
+        this.position('relative');
+        this.addChild(this.caret, this.subs);
+        this.subs.stack(this.config.subs.map(item => new Menu(item)), { vertical: true })
+          .display('none');
       }
-    });
-    this.position('relative')
-      .overflow('hidden')
-      .zIndex('1');
-
-    const drag = (e) => {
-      let delta = e.pageY - lastPageY;
-      lastPageY = e.pageY;
-      raf(() => {
-        this._content.node().scrollTop += delta / this.scrollRatio;
-      });
+      if(this.config.shortcut) {
+        this.addChild(
+          this.shortcut = new Span()
+            .fontSize(Theme.Fonts.normal)
+            .color(Theme.Colors.$.darken(Theme.Colors.ContextMenu.textColor, 30))
+            .text(this.config.shortcut).whiteSpace('nowrap')
+        );
+      }
+      if(this.config.fns) {
+        this.on({
+          click: (e) => {
+            this.config.fns();
+          }
+        });
+      }
+    }else {
+      this.addChild(
+          new HR()
+            .borderColor(Theme.Colors.ContextMenu.borderColor)
+        )
     }
-
-    const stop = function() {
-      // remove mousedown css
-      window.removeEventListener('mousemove', drag);
-      window.removeEventListener('mouseup', stop);
-    }
-
-    const moveBar = (e) => {
-      let totalHeight = this.node().scrollHeight,
-          ownHeight = this.node().clientHeight;
-
-      this.scrollRatio = ownHeight / totalHeight;
-
-      var isRtl = this.direction() === 'rtl';
-      var right = isRtl ?
-        (this._content.node().clientWidth - this._bar.node().clientWidth + 18) :
-        (this._content.node().clientWidth - this._bar.node().clientWidth) * -1;
-
-      raf(() => {
-        // Hide scrollbar if no scrolling is possible
-        if(this.scrollRatio >= 1) {
-          // this._bar.classList.add('ss-hidden')
-        } else {
-          // _this.bar.classList.remove('ss-hidden')
-          this._bar.height(Math.max(this.scrollRatio * 100, 10) + '%')
-            .top((this._content.node().scrollTop / totalHeight ) * 100 + '%')
-            .right(right);
-        }
-      });
-    }
-
-    super.addChild(this._content, this._bar);
   }
 
-  addChild(...children) {
-    this._content.addChild(...children);
-    return this;
+  clearHover() {
+    this.backgroundColor(Theme.Colors.transparent);
+    if(this.label) this.label.color(Theme.Colors.ContextMenu.textColor);
+    if(this.caret) this.caret.borderColor(Theme.Colors.ContextMenu.textColor);
+    if(this.shortcut) this.shortcut.color(Theme.Colors.$.darken(Theme.Colors.ContextMenu.textColor, 30));
+    if(this.subs) this.subs.display('none');
   }
 
+  setHover() {
+    this.backgroundColor(Theme.Colors.appBlue01);
+    if(this.label) this.label.color(Theme.Colors.white);
+    if(this.caret) this.caret.borderColor(Theme.Colors.white);
+    if(this.shortcut) this.shortcut.color(Theme.Colors.white);
+    if(this.subs) this.subs.display('flex');
+  }
+
+  toggleDisplay(check) {
+    if(this.config.separator) {
+      if(check) this.display('block');
+      else this.display('none');
+    }else {
+      if(check) this.display('flex');
+      else this.display('none');
+    }
+  }
 }
-

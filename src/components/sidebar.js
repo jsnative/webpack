@@ -59,23 +59,23 @@ export default class Sidebar extends Component {
     this.fileExplorer.addChild(new Folder(
       { type: Config.sidebarDataKind.folder, name: 'App Folder', parent: 0, id: 1, subs: [
         { type: Config.sidebarDataKind.file, name: 'index.js', parent: 1, id: 2 },
-        { type: Config.sidebarDataKind.file, name: 'index.js', parent: 1, id: 2, dept: 1 },
-        { type: Config.sidebarDataKind.file, name: 'config.js', parent: 1, id: 3, dept: 1 },
-        { type: Config.sidebarDataKind.folder, name: 'src', parent: 1, id: 4,  subs: [
+        { type: Config.sidebarDataKind.file, name: 'index.js', parent: 1, id: 3, dept: 1 },
+        { type: Config.sidebarDataKind.file, name: 'config.js', parent: 1, id: 4, dept: 1 },
+        { type: Config.sidebarDataKind.folder, name: 'src', parent: 1, id: 5,  subs: [
           { type: Config.sidebarDataKind.file, name: 'This one is special.js', parent: 2, id: 6},
           { type: Config.sidebarDataKind.file, name: 'This one is another special.js', parent: 2, id: 7},
-          { type: Config.sidebarDataKind.folder, name: 'animation', parent: 2, id: 4,  subs: [
-            { type: Config.sidebarDataKind.file, name: 'Template.js', parent: 3, id: 6},
-            { type: Config.sidebarDataKind.file, name: 'Thnother special.js', parent: 3, id: 7},
-            { type: Config.sidebarDataKind.file, name: 'Special.js', parent: 3, id: 6},
-            { type: Config.sidebarDataKind.file, name: 'Another special.js', parent: 3, id: 7},
-            { type: Config.sidebarDataKind.file, name: 'This one is special.js', parent: 3, id: 6},
-            { type: Config.sidebarDataKind.file, name: 'This one is another special.js', parent: 3, id: 7}
+          { type: Config.sidebarDataKind.folder, name: 'animation', parent: 2, id: 8,  subs: [
+            { type: Config.sidebarDataKind.file, name: 'Template.js', parent: 3, id: 9},
+            { type: Config.sidebarDataKind.file, name: 'Thnother special.js', parent: 3, id: 10},
+            { type: Config.sidebarDataKind.file, name: 'Special.js', parent: 3, id: 11},
+            { type: Config.sidebarDataKind.file, name: 'Another special.js', parent: 3, id: 12},
+            { type: Config.sidebarDataKind.file, name: 'This one is special.js', parent: 3, id: 13},
+            { type: Config.sidebarDataKind.file, name: 'This one is another special.js', parent: 3, id: 14}
 
           ] },
-          { type: Config.sidebarDataKind.folder, name: 'Extras', parent: 2, id: 4,  subs: [
-            { type: Config.sidebarDataKind.file, name: 'This one is special.js', parent: 3, id: 6},
-            { type: Config.sidebarDataKind.file, name: 'This one is another special.js', parent: 3, id: 7}
+          { type: Config.sidebarDataKind.folder, name: 'Extras', parent: 2, id: 16,  subs: [
+            { type: Config.sidebarDataKind.file, name: 'This one is special.js', parent: 3, id: 15},
+            { type: Config.sidebarDataKind.file, name: 'This one is another special.js', parent: 3, id: 17}
           ] }
         ] },
       ]}
@@ -232,8 +232,7 @@ export class Folder extends Container {
 
     this.container = new Container()
       .size('100%', 'auto')
-      .transition('.3s all cubic-bezier(0.19, 1, 0.22, 1)')
-      // .overflow('hidden');
+      .transition('.3s all cubic-bezier(0.19, 1, 0.22, 1)');
 
     this.addChild(
       new Container()
@@ -363,7 +362,7 @@ export class File extends Container {
     });
 
     Bus.on(Config.events.Sidebar.fileSelected, (data) => {
-      if(this.structure.id !== data.id && this.structure.name !== data.name) {
+      if(this.structure.id !== data.id) {
         if(this.selected) {
           this.selected = false;
           this.backgroundColor(Theme.transparent);

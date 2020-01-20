@@ -11,7 +11,7 @@ export default class MainContainer extends Container {
   editor;
   designer;
   sidebar;
-
+  WinPref;
   constructor() {
     super();
     // initialize
@@ -20,8 +20,8 @@ export default class MainContainer extends Container {
     this.background(Theme.Colors.white)
       .size('100vw', '100vh');
     // Workspace user preferences
-    const UpWs = Config.UserPreferences.workspace,
-      WinPref = UpWs.editor.window;
+    const UpWs = Config.UserPreferences.workspace;
+    this.WinPref = UpWs.editor.window;
     //
     this.sidebar = new Sidebar();
     this.addChild(this.sidebar);
@@ -29,7 +29,7 @@ export default class MainContainer extends Container {
       .right(window.innerWidth - 240);
     this.sidebar.addChild(new ContainerResize(this.sidebarResize))
     //
-    if(WinPref.position === WinPref.position$.attached) {
+    if(this.WinPref.position === this.WinPref.position$.attached) {
       this.editor = new Editor();
       this.addChild(this.editor);
       this.editor.absTopLeft(0, 240)
@@ -41,17 +41,22 @@ export default class MainContainer extends Container {
     //
     this.designer = new Designer();
     this.addChild(this.designer);
-    this.designer.absTopLeft(0, 240 + 600)
+    this.designer.absTopLeft(0,
+        this.WinPref.position === this.WinPref.position$.attached ? 240 + 600 : 240)
       .right(0);
   }
 
   sidebarResize = (x, y, event) => {
     this.sidebar.width(event.pageX + 8);
     Config.UserPreferences.workspace.sidebar.width = event.pageX + 8;
-    const editorRight = this.editor.node().getBoundingClientRect().right;
-    this.editor.left(event.pageX + 8).width(editorRight - (event.pageX + 8));
-    Config.UserPreferences.workspace.editor.width = editorRight - (event.pageX + 8);
-    this.designer.left(editorRight);
+    if(this.WinPref.position === this.WinPref.position$.attached) {
+      const editorRight = this.editor.node().offsetLeft + this.editor.node().offsetWidth;
+      this.editor.left(event.pageX + 8).width(editorRight - (event.pageX + 8));
+      Config.UserPreferences.workspace.editor.width = editorRight - (event.pageX + 8);
+      this.designer.left(editorRight);
+    }else {
+      this.designer.left(event.pageX + 8);
+    }
     // Save changes
     Config.UserPreferences.save();
   }
@@ -85,7 +90,10 @@ export class ContainerResize extends Component {
   constructor(onResize) {
     super(onResize);
     this.size(8, '100vh')
-      .backgroundColor('transparent');
+      .backgroundColor('transparent')
+      .position('absolute')
+      .left('calc(100% - 8px)')
+      .top(0);
     this.handle = new Container()
       .width(1)
       .backgroundColor(Theme.Colors.Panel.resizeHandle)
@@ -93,20 +101,14 @@ export class ContainerResize extends Component {
     this.addChild(this.handle)
       .display('flex')
       .alignItems('center')
-      .cursor('col-resize');
+      .cursor('col-resize')
+      .userSelect('none');
     Draggable(this, (x, y, event) => {
       onResize(x, y, event)
     });
   }
 
   onCreate() {
-    setTimeout(() => {
-      const coord = this.coord(this.parent());
-      this.position('absolute')
-        .right(0)
-        .top(0)
-        .zIndex(1);
-    });
   }
 
   coord(element) {
