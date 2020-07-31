@@ -1,13 +1,11 @@
-import {
-  PageComponent, H1, P, Container
-} from '@core/components';
+import { PageComponent, H1, P, Container } from '@core/components';
+import theme from '@src/theme';
 
 export default class Home extends PageComponent {
 
   constructor() {
     // initialization
     super();
-    const theme = defaultTheme;
     this.backgroundColor(theme.background)
       .padding(theme.padding.medium)
       .color(theme.color);
