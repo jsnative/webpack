@@ -56,7 +56,7 @@
   },
   "dependencies": {
     "@js-native/lib": "^1.0.4",
-    "codemirror": "^5.50.0",
+    "codemirror": "^5.58.2",
     "save": "^2.4.0",
     "simplebar": "^5.1.0"
   }
